@@ -1,0 +1,267 @@
+/* 基本重置和全局样式 */
+:root {
+    --thumbnail-size: 80px; /* 定义CSS变量用于缩放 */
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0; padding: 0; background-color: #f0f2f5; color: #333; overflow: hidden;
+}
+
+/* --- 菜单、容器、面板等基础结构 --- */
+.main-menu { background-color: #fff; border-bottom: 1px solid #ddd; height: 30px; display:flex; align-items: center; user-select: none; padding: 0 10px; }
+.main-menu ul { list-style: none; margin: 0; padding: 0; display: flex; }
+.main-menu li { margin-right: 15px; }
+.main-menu a { text-decoration: none; color: #333; font-size: 0.9em; }
+.container { display: flex; height: calc(100vh - 31px); box-sizing: border-box; }
+.panel { display: flex; flex-direction: column; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; height: 100%; }
+.panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; background-color: #f7f7f7; padding: 0 10px; height: 35px; flex-shrink: 0; }
+.panel-header h2 { font-size: 1rem; font-weight: 500; margin: 0; }
+.panel-content { overflow-y: auto; flex-grow: 1; }
+.panel-footer { border-top: 1px solid #ccc; display: flex; gap: 5px; background-color: #f7f7f7; flex-shrink: 0; padding: 5px; align-items: center; }
+.panel-footer.top-footer { border-top: none; border-bottom: 1px solid #ccc; }
+.panel-footer.column-footer { flex-direction: column; align-items: stretch; padding: 8px; }
+.panel-footer textarea { border: 1px solid #ccc; border-radius: 3px; resize: vertical; padding: 5px; font-family: inherit; }
+.panel-footer input { flex-grow: 1; border: 1px solid #ccc; border-radius: 3px; padding: 4px; }
+.relative-position { position: relative; }
+.hidden { display: none !important; }
+
+/* --- 左侧栏：视图切换、缩放、多选 --- */
+.view-controls { justify-content: space-between; }
+.zoom-control { display: flex; align-items: center; gap: 5px; font-size: 0.9em; }
+#zoom-slider { display: none; } /* 默认隐藏，仅网格视图显示 */
+#image-list-panel.grid-view #zoom-slider { display: block; }
+.view-switch button { background: #eee; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; }
+.view-switch button.active { background: #cce; border-color: #99c; }
+
+/* 列表视图 */
+#image-grid { display: none; }
+#image-table { width: 100%; border-collapse: collapse; }
+#image-table thead { position: sticky; top: 0; background-color: #f9f9f9; z-index: 1; }
+#image-table th, #image-table td { padding: 4px 8px; border-bottom: 1px solid #eee; text-align: left; }
+.image-row { height: 60px; cursor: pointer; user-select: none; }
+.image-row:hover, .grid-item:hover { background-color: #e8f4ff; }
+.image-row.selected, .grid-item.selected { background-color: #b3d4fc !important; }
+.col-thumb img { width: 60px; height: 50px; object-fit: cover; border-radius: 2px; vertical-align: middle; }
+
+/* 网格视图 */
+#image-list-panel.grid-view #image-table { display: none; }
+#image-list-panel.grid-view #image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--thumbnail-size), 1fr)); gap: 10px; padding: 10px; }
+.grid-item { display: flex; flex-direction: column; align-items: center; padding: 5px; border-radius: 4px; border: 1px solid transparent; cursor: pointer; }
+.grid-item-thumb-wrapper { position: relative; width: var(--thumbnail-size); height: var(--thumbnail-size); }
+.grid-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+.grid-item .row-checkbox { position: absolute; top: 5px; left: 5px; }
+.grid-item-name { font-size: 0.8em; margin-top: 5px; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- 标签通用样式 --- */
+.tag-list { list-style: none; padding: 0; margin: 0; }
+.tag-list li { display: flex; align-items: center; padding: 6px 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; cursor: pointer; user-select: none; }
+.tag-list li:hover { background-color: #f0f0f0; }
+.tag-name { flex-grow: 1; }
+.tag-count { font-size: 0.9em; color: #333; background-color: #ddd; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+
+/* --- 可编辑字段 --- */
+.editable-name, .editable-tag { padding: 2px; }
+.edit-input { box-sizing: border-box; width: 100%; border: 1px solid #007bff; outline: none; padding: 1px; font-family: inherit; font-size: inherit; }
+
+/* --- 中间栏：标签拖拽 --- */
+.tag-drag-handle {cursor: grab; padding: 0 8px 0 0; color: #aaa; }
+.sortable-ghost { opacity: 0.4; background: #cce; }
+.sortable-drag { opacity: 0.9; }
+
+/* --- 拖拽上传文件 --- */
+#drop-zone-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+#drop-zone-overlay.drag-over { background: rgba(0, 123, 255, 0.5); }
+.drop-zone-text { color: white; font-size: 2em; font-weight: bold; border: 3px dashed white; padding: 20px 40px; border-radius: 10px; }
+
+/* --- 分页 --- */
+.pagination-controls { display: flex; align-items: center; gap: 5px; }
+
+/* --- Split.js --- */
+.gutter { background-color: #e5e7eb; }
+.gutter.gutter-horizontal { cursor: col-resize; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="30"><path d="M2 0 v30 M5 0 v30 M8 0 v30" stroke="%239ca3af" stroke-width="1"/></svg>'); background-repeat: no-repeat; background-position: 50%; }
+body.is-dragging { cursor: col-resize; user-select: none; }
+
+
+/* --- 左侧栏新增样式 --- */
+.view-controls {
+    justify-content: space-between;
+    flex-wrap: wrap; /* 允许换行以适应小窗口 */
+}
+
+.filter-control {
+    flex-grow: 1;
+    min-width: 150px;
+    padding-right: 10px;
+}
+
+#image-filter-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 当筛选生效时，给状态栏一个提示 */
+.status-text.filtered {
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* --- 新增：右键菜单样式 --- */
+#context-menu {
+    position: absolute;
+    z-index: 10000;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    min-width: 200px;
+    padding: 5px 0;
+}
+
+#context-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#context-menu li {
+    padding: 8px 15px;
+    font-size: 0.9em;
+    cursor: pointer;
+    user-select: none;
+}
+
+#context-menu li:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+#context-menu li.separator {
+    height: 1px;
+    background-color: #eee;
+    padding: 0;
+    margin: 5px 0;
+}
+
+/* --- 菜单栏增强样式 --- */
+.main-menu {
+    /* 之前的样式保持不变，确保 user-select: none */
+    position: relative;
+    z-index: 2000; /* 确保菜单层级高 */
+}
+
+.menu-bar {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu-item {
+    position: relative; /* 为下拉菜单定位 */
+}
+
+.menu-item > a {
+    display: block;
+    padding: 5px 15px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.9em;
+}
+
+.menu-item:hover > a {
+    background-color: #f0f0f0;
+}
+
+/* 下拉菜单容器 */
+.menu-item .dropdown-content {
+    display: none; /* 默认隐藏 */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    min-width: 600px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    border: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    padding: 5px 0;
+    list-style: none;
+}
+
+/* 显示状态 */
+.dropdown-content.show {
+    display: block;
+}
+
+.dropdown-content li a {
+    display: block;
+    padding: 8px 15px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.dropdown-content li a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.dropdown-content li.separator {
+    height: 1px;
+    background-color: #eee;
+    margin: 5px 0;
+    padding: 0;
+}
+
+.dropdown-content li.disabled {
+    padding: 8px 15px;
+    color: #999;
+    font-style: italic;
+    font-size: 0.85em;
+    pointer-events: none;
+}
+
+.dropdown-content .history-label {
+    font-size: 0.8em;
+    color: #888;
+    padding: 4px 15px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+
+/* --- START OF FILE style.css (Partial Additions) --- */
+
+/* 中间栏标签选中样式 */
+.tag-item.selected-tag {
+    background-color: #b3d4fc !important; /* 覆盖内联背景色，需要 !important 或者更强的特异性 */
+    border-color: #007bff;
+}
+
+/* 按钮栏样式微调 */
+.panel-toolbar button {
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 3px 0;
+}
+.panel-toolbar button:hover {
+    background: #eef;
+    border-color: #aaf;
+}
+
+
+body.hide-translation [translate="yes"] { display: none; }
+        /* 新增: 美化菜单栏中的开关样式 */
+        .menu-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px; /* 复选框和文字的间距 */
+            padding: 0 10px; /* 左右边距，与其他菜单项对齐 */
+            cursor: pointer;
+        }
+        .menu-toggle label {
+            cursor: pointer; /* 让标签文本也能被点击 */
+            user-select: none; /* 防止双击时选中文本 */
+        }

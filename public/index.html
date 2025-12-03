@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简易打标器</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body translate="no">
+    <nav class="main-menu">
+        <ul class="menu-bar">
+            <!-- 文件菜单 (带下拉) -->
+            <li class="menu-item dropdown">
+                <a href="#" id="menu-file-trigger">文件(F) ▾</a>
+                <ul class="dropdown-content" id="menu-file-dropdown">
+                    <li><a href="#" id="menu-open-dataset">📂 打开数据集目录...</a></li>
+                    <li class="separator"></li>
+                    <!-- 历史记录将由 JS 动态插入到这里 -->
+                    <li class="disabled">无历史记录</li>
+                </ul>
+            </li>
+            <!-- <li class="menu-item"><a href="#">界面(V)</a></li>
+            <li class="menu-item"><a href="#">设置(S)</a></li> -->
+            <li class="menu-item menu-toggle">
+                <input type="checkbox" id="translation-toggle" checked>
+                <label for="translation-toggle">显示翻译</label>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <!-- 左侧栏：图片列表 -->
+        <div id="image-list-panel" class="panel list-view"> <!-- 初始为列表视图 -->
+            <div class="panel-header">
+                <h2>数据集</h2>
+                <span id="dataset-status" class="status-text">未加载</span>
+            </div>
+            <div class="panel-content relative-position">
+                <div id="image-loading" class="loading-overlay hidden">加载中...</div>
+                <div id="image-display-area">
+                    <!-- 表格视图 -->
+                    <table id="image-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30px;"><input type="checkbox" id="select-all-checkbox" title="全选/全不选">
+                                </th>
+                                <th style="width: 70px;">Image</th>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="image-tbody"></tbody>
+                    </table>
+                    <!-- 缩略图网格视图 (通过CSS切换) -->
+                    <div id="image-grid"></div>
+                </div>
+            </div>
+            <div class="panel-footer view-controls">
+                <div class="filter-control">
+                    <input type="text" id="image-filter-input" placeholder="筛选图片...">
+                </div>
+                <div class="view-switch">
+                    <button id="btn-view-list" class="active" title="列表视图">📄</button>
+                    <button id="btn-view-grid" title="网格视图">🖼️</button>
+                </div>
+                <div class="zoom-control">
+                    <span>Zoom:</span>
+                    <input type="range" id="zoom-slider" min="50" max="250" value="80" step="10">
+                </div>
+                <div class="pagination-controls">
+                    <button id="btn-prev" disabled>&lt;</button>
+                    <span id="page-info">Page 0 / 0</span>
+                    <button id="btn-next" disabled>&gt;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间栏：当前图片的标签 -->
+        <div id="selected-tags-panel" class="panel">
+            <div class="panel-header">
+                <h2>标签</h2>
+                <button id="btn-save-tags" title="保存对所有选中图片的标签修改">保存</button>
+                 <!-- 新增：批量操作按钮栏 -->
+    <div class="panel-toolbar" style="padding: 1px; border-bottom: 1px solid #eee; display: flex; gap: 5px; background: #f9f9f9;">
+        <button id="btn-global-add-start" title="全局增加标签到首位 (支持逗号分隔)" style="width: 75px; font-size:0.8em;">添加输入标签到首位</button>
+        <button id="btn-global-add-end" title="全局增加标签到末位 (支持逗号分隔)" style="width: 75px; font-size:0.8em;">添加输入标签到末尾</button>
+        <button id="btn-global-delete" title="全局删除指定标签 (支持逗号分隔)" style="width: 75px; font-size:0.8em;">全局删除指定输入标签</button>
+    </div>
+            </div>
+            <div class="panel-footer column-footer">
+                <label for="tags-textarea">文本模式 (逗号分隔):</label>
+                <textarea id="tags-textarea" rows="10"></textarea>
+            </div>
+            <div class="panel-content">
+                <ul id="selected-tags-list" class="tag-list"></ul>
+            </div>
+
+        </div>
+
+        <!-- 右侧栏：数据集标签统计 -->
+        <div id="all-tags-panel" class="panel">
+            <div class="panel-header">
+                <h2>数据集标签统计</h2>
+            </div>
+            <div class="panel-footer top-footer">
+                <input type="text" id="tag-search-input" placeholder="搜索标签..." autocomplete="off">
+            </div>
+            <div class="panel-content">
+                <ul id="all-tags-list" class="tag-list"></ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- 拖拽上传遮罩层 -->
+    <div id="drop-zone-overlay" class="hidden">
+        <div class="drop-zone-text">将图片拖拽到此处添加</div>
+    </div>
+
+    <!-- HTML 模板区 -->
+    <template id="tpl-image-row">
+        <tr class="image-row" data-filename="">
+            <td class="col-checkbox"><input type="checkbox" class="row-checkbox"></td>
+            <td class="col-thumb"><img src="" loading="lazy"></td>
+            <td class="col-name"><span class="editable-name"></span></td>
+        </tr>
+    </template>
+
+    <template id="tpl-image-grid-item">
+        <div class="grid-item" data-filename="">
+            <div class="grid-item-thumb-wrapper">
+                <img src="" loading="lazy">
+                <input type="checkbox" class="row-checkbox">
+            </div>
+            <div class="grid-item-name"><span class="editable-name"></span></div>
+        </div>
+    </template>
+
+    <template id="tpl-tag-item">
+        <li class="tag-item" data-tag-name="">
+            <input type="checkbox" class="tag-checkbox" style="margin-right: 5px;">
+            <span class="tag-drag-handle">::</span>
+            <span class="tag-name editable-tag"></span>
+            <span class="tag-count"></span>
+        </li>
+    </template>
+    <div id="context-menu" class="hidden">
+        <ul id="context-menu-items"></ul>
+    </div>
+
+    <!-- 引入本地库 -->
+    <script src="js/libs/split.min.js"></script>
+    <script src="js/libs/Sortable.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
